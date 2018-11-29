@@ -1,0 +1,43 @@
+shader watermelon(
+    int divides = 8,
+    float light_green_width = 5.0,
+    float noise_factor = 0.0,
+    output color out_color = color(0.0, 0.0, 0.0)
+    )
+{
+    float r,g,b;
+    
+    //noise_factor comes from a Noise Texture Node in Blender
+    float minor_noise  = noise_factor*0.5;
+    float angle_new = atan2(P[0],P[1])  + minor_noise + light_green_width;
+    
+    float intensity = sin(angle_new*divides);
+
+    r = 0.3 + 0.16*intensity;
+    g = 0.43 + 0.16*intensity;
+    b = 0.12 + 0.06*intensity;
+    color shell_color = color(r,g,b);
+    
+    float dist_center = distance(P, point(0,0,0));
+    
+    float fruit_noise = noise("perlin", P*8.0);
+    
+    r = 0.92;
+    g = 0.44 + (0.1*fruit_noise);
+    b = 0.32 + (0.1*fruit_noise);
+    color fruit_color = color(r,g,b);
+  
+    r = 0.98;
+    g = 0.97 + (0.1*fruit_noise);
+    b = 0.78 + (0.1*fruit_noise);
+    color light_fruit_color = color(r,g,b);
+    
+    
+    float fruit_region = 1.0 - smoothstep(dist_center, 0.95, 0.93);
+    
+    fruit_color = mix(fruit_color, light_fruit_color, fruit_region);
+    
+    float shell_region = 1.0 - smoothstep(dist_center, 0.99, 0.98);
+    
+    out_color = mix(fruit_color, shell_color, shell_region);
+}
